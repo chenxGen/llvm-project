@@ -726,7 +726,7 @@ Optional<FileEntryRef> Preprocessor::LookupFile(
     bool *IsFrameworkFound, bool SkipCache) {
   Module *RequestingModule = getModuleForLocation(FilenameLoc);
   bool RequestingModuleIsModuleInterface = !SourceMgr.isInMainFile(FilenameLoc);
-
+    printf("[Preprocessor] look up file : %s\n",Filename.str().c_str());
   // If the header lookup mechanism may be relative to the current inclusion
   // stack, record the parent #includes.
   SmallVector<std::pair<const FileEntry *, const DirectoryEntry *>, 16>
@@ -1728,6 +1728,7 @@ Optional<FileEntryRef> Preprocessor::LookupHeaderIncludeOrImport(
     const FileEntry *LookupFromFile, StringRef& LookupFilename,
     SmallVectorImpl<char> &RelativePath, SmallVectorImpl<char> &SearchPath,
     ModuleMap::KnownHeader &SuggestedModule, bool isAngled) {
+    printf("%s\n",__func__);
   Optional<FileEntryRef> File = LookupFile(
       FilenameLoc, LookupFilename,
       isAngled, LookupFrom, LookupFromFile, CurDir,
@@ -1853,13 +1854,15 @@ Preprocessor::ImportAction Preprocessor::HandleHeaderIncludeOrImport(
     SourceLocation HashLoc, Token &IncludeTok, Token &FilenameTok,
     SourceLocation EndLoc, const DirectoryLookup *LookupFrom,
     const FileEntry *LookupFromFile) {
+    
   SmallString<128> FilenameBuffer;
   StringRef Filename = getSpelling(FilenameTok, FilenameBuffer);
   SourceLocation CharEnd = FilenameTok.getEndLoc();
-
+    printf("[Preprocessor::HandleHeaderIncludeOrImport] %s\n", Filename.str().c_str());
   CharSourceRange FilenameRange
     = CharSourceRange::getCharRange(FilenameTok.getLocation(), CharEnd);
   StringRef OriginalFilename = Filename;
+    // 是否`#include <xxx>`
   bool isAngled =
     GetIncludeFilenameSpelling(FilenameTok.getLocation(), Filename);
 
@@ -1888,7 +1891,7 @@ Preprocessor::ImportAction Preprocessor::HandleHeaderIncludeOrImport(
     // Immediately leave the pragma.
     PragmaAssumeNonNullLoc = SourceLocation();
   }
-
+    // TODO: what is map header?
   if (HeaderInfo.HasIncludeAliasMap()) {
     // Map the filename with the brackets still attached.  If the name doesn't
     // map to anything, fall back on the filename we've already gotten the
@@ -1929,7 +1932,7 @@ Preprocessor::ImportAction Preprocessor::HandleHeaderIncludeOrImport(
       CurDir, Filename, FilenameLoc, FilenameRange, FilenameTok,
       IsFrameworkFound, IsImportDecl, IsMapped, LookupFrom, LookupFromFile,
       LookupFilename, RelativePath, SearchPath, SuggestedModule, isAngled);
-
+// TODO: pch header
   if (usingPCHWithThroughHeader() && SkippingUntilPCHThroughHeader) {
     if (File && isPCHThroughHeader(&File->getFileEntry()))
       SkippingUntilPCHThroughHeader = false;

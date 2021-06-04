@@ -393,7 +393,7 @@ void CompilerInstance::createPreprocessor(TranslationUnitKind TUKind) {
 
   // The AST reader holds a reference to the old preprocessor (if any).
   TheASTReader.reset();
-
+    printf("%s\n",__func__);
   // Create the Preprocessor.
   HeaderSearch *HeaderInfo =
       new HeaderSearch(getHeaderSearchOptsPtr(), getSourceManager(),

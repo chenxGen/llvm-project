@@ -382,7 +382,9 @@ Optional<FileEntryRef> DirectoryLookup::LookupFile(
   InUserSpecifiedSystemFramework = false;
   IsInHeaderMap = false;
   MappedName.clear();
-
+  
+//    printf("[DirectoryLookup::LookupFile] %s\n", Filename.str().c_str());
+    
   SmallString<1024> TmpDir;
   if (isNormalDir()) {
     // Concatenate the requested file onto the directory.
@@ -397,18 +399,21 @@ Optional<FileEntryRef> DirectoryLookup::LookupFile(
       RelativePath->clear();
       RelativePath->append(Filename.begin(), Filename.end());
     }
-
+    printf("[DirectoryLookup] do dir lookup : %s\n", getDir()->getName().str().c_str());
     return HS.getFileAndSuggestModule(TmpDir, IncludeLoc, getDir(),
                                       isSystemHeaderDirectory(),
                                       RequestingModule, SuggestedModule);
   }
 
-  if (isFramework())
-    return DoFrameworkLookup(Filename, HS, SearchPath, RelativePath,
-                             RequestingModule, SuggestedModule,
-                             InUserSpecifiedSystemFramework, IsFrameworkFound);
+    if (isFramework()) {
+        printf("[DirectoryLookup] do framework lookup : %s\n", getName().str().c_str());
+        return DoFrameworkLookup(Filename, HS, SearchPath, RelativePath,
+                                 RequestingModule, SuggestedModule,
+                                 InUserSpecifiedSystemFramework, IsFrameworkFound);
+    }
 
   assert(isHeaderMap() && "Unknown directory lookup");
+  printf("[DirectoryLookup] do hmap lookup : %s\n", getName().str().c_str());
   const HeaderMap *HM = getHeaderMap();
   SmallString<1024> Path;
   StringRef Dest = HM->lookupFilename(Filename, Path);
@@ -515,6 +520,7 @@ Optional<FileEntryRef> DirectoryLookup::DoFrameworkLookup(
     SmallVectorImpl<char> *RelativePath, Module *RequestingModule,
     ModuleMap::KnownHeader *SuggestedModule,
     bool &InUserSpecifiedSystemFramework, bool &IsFrameworkFound) const {
+  
   FileManager &FileMgr = HS.getFileMgr();
 
   // Framework names must have a '/' in the filename.
@@ -759,6 +765,7 @@ Optional<FileEntryRef> HeaderSearch::LookupFile(
     Module *RequestingModule, ModuleMap::KnownHeader *SuggestedModule,
     bool *IsMapped, bool *IsFrameworkFound, bool SkipCache,
     bool BuildSystemModule) {
+  printf("[HeaderSearch] LookupFile : %s\n", Filename.str().c_str());
   if (IsMapped)
     *IsMapped = false;
 
